@@ -1,0 +1,10 @@
+{
+  "name": "cryptokeyhole",
+  "version": "1.2.0",
+  "description": "Crypto market and on-chain answers: liquidation maps, funding and open interest, price history, ETF flows and exchange reserves. On-chain data from our nodes.",
+  "mcpServers": {
+    "cryptokeyhole": {
+      "httpUrl": "https://cryptokeyhole.com/api/v1/mcp"
+    }
+  }
+}

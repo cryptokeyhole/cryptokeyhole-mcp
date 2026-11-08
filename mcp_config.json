@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "analytics": {
+      "serverUrl": "https://cryptokeyhole.com/api/v1/mcp"
+    }
+  }
+}

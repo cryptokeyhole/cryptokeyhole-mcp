@@ -9,6 +9,7 @@ https://cryptokeyhole.com/api/v1/mcp
 - **Remote, nothing to install.** Streamable HTTP transport; point your MCP client at the URL above.
 - **No account, no API key.** The server answers without credentials and serves everything the CryptoKeyhole Free plan includes.
 - **Our own data.** Bitcoin and Ethereum metrics are calculated from CryptoKeyhole's own full nodes; market series come from the market data CryptoKeyhole collects. Each result carries its source, method and attribution.
+- **Answers with charts.** The question tools answer common market questions in one call, with the time of the reading and a link to the page the figures come from; clients that show MCP Apps also get an interactive chart.
 - **Exact values.** Numbers arrive as decimal strings with their finality, source clocks and revision, and missing data is reported as a gap, never as zero.
 - **Listed in the official MCP Registry** as [`com.cryptokeyhole/analytics`](https://registry.modelcontextprotocol.io/v0.1/servers?search=com.cryptokeyhole).
 
@@ -24,22 +25,41 @@ Documentation on the site: [cryptokeyhole.com/mcp/](https://cryptokeyhole.com/mc
   - [VS Code](#vs-code)
   - [Windsurf](#windsurf)
   - [Gemini CLI](#gemini-cli)
+  - [Antigravity](#antigravity)
   - [Any Streamable HTTP client](#any-streamable-http-client)
 - [Example prompts](#example-prompts)
 - [What the free server covers](#what-the-free-server-covers)
 - [Reading the results](#reading-the-results)
 - [Other ways to get the data](#other-ways-to-get-the-data)
-- [Registry entry](#registry-entry)
+- [Files in this repository](#files-in-this-repository)
 
 ## Tools
 
 All tools are read-only and idempotent.
 
+### Question tools
+
+Each one answers a common question in one call: a short answer with the time of the reading, a link to the page on cryptokeyhole.com and, in clients that show MCP Apps, an interactive chart.
+
+| Tool | What it answers |
+|---|---|
+| `get_liquidation_map` | Where leveraged Bitcoin or Ethereum futures positions would be liquidated right now: the largest long and short clusters around the price, the totals within 5% and the map's measured accuracy. Redrawn every five minutes. |
+| `get_derivatives_snapshot` | Bitcoin or Ethereum futures liquidations in the last 24 hours, the funding rate averaged across venues by open interest, open interest with its 24-hour change, and the next options expiry's max pain. |
+| `get_price_history` | A coin's daily close on any UTC day, or its change between two days with the highest and lowest close in between. |
+| `get_eth_btc_ratio` | The ETH/BTC ratio now with its 30-day change, 200-day average and all-time high close, or its change between two days. |
+| `get_support_levels` | Bitcoin's price against the levels traders watch: the 200-day, 200-week and 1-year averages, the bull market support band, the Pi Cycle Bottom line, the realized price and the power-law lines. |
+| `get_exchange_reserves` | Bitcoin, ether and stablecoins at each exchange that publishes its addresses, read on chain, with net flows over 24 hours and 7 days and flags such as unusual outflows. |
+| `get_etf_flows` | Daily net flows of the US spot ETFs of one coin, or of every coin together, from the issuers' own daily files. |
+
+### Data tools
+
+Any metric on the site, by its exact id:
+
 | Tool | What it does |
 |---|---|
 | `get_assets_list` | Lists the assets CryptoKeyhole covers, with their ids (`BTC`, `ETH`, `LINK` and more). |
-| `get_metrics_list` | Finds an asset's metrics by category, including metrics that are delayed or held, with cursor paging. |
-| `get_asset_metrics` | Lists the available and held metrics of one asset. |
+| `get_asset_metrics` | Finds an asset's metrics by words (for example "puell" or "exchange balance") or by category, with each metric's exact id, unit, intervals, history and the plan its data needs. |
+| `get_metrics_list` | The same search and rows, for BTC by default. |
 | `get_metric_metadata` | Returns a metric's definition, supported intervals, method, coverage and source limitations. |
 | `fetch_metric` | Returns the exact observations of one metric for a time range, with source clocks, revision, finality and gaps. Optional SMA, EMA or median smoothing. |
 | `fetch_bulk_metrics` | Reads several metric selections in one call. Each keeps its own provenance and revision; together they are not one atomic snapshot. |
@@ -80,7 +100,9 @@ Or in a project's `.mcp.json`:
 
 ### Claude Desktop and claude.ai
 
-Open **Settings > Connectors > Add custom connector**, name it `CryptoKeyhole` and paste `https://cryptokeyhole.com/api/v1/mcp` as the URL. No OAuth settings are needed.
+CryptoKeyhole is in Claude's connector directory: [claude.ai/directory/cryptokeyhole](https://claude.ai/directory/cryptokeyhole).
+
+Or open **Settings > Connectors > Add custom connector**, name it `CryptoKeyhole` and paste `https://cryptokeyhole.com/api/v1/mcp` as the URL. No OAuth settings are needed.
 
 If you prefer the `claude_desktop_config.json` file, which starts local processes, bridge to the remote server with [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) (needs Node.js):
 
@@ -146,13 +168,39 @@ code --add-mcp '{"name":"cryptokeyhole","type":"http","url":"https://cryptokeyho
 
 ### Gemini CLI
 
-`~/.gemini/settings.json`:
+Install it as an extension from this repository:
+
+```bash
+gemini extensions install https://github.com/cryptokeyhole/cryptokeyhole-mcp
+```
+
+Or add it to `~/.gemini/settings.json`:
 
 ```json
 {
   "mcpServers": {
     "cryptokeyhole": {
       "httpUrl": "https://cryptokeyhole.com/api/v1/mcp"
+    }
+  }
+}
+```
+
+### Antigravity
+
+Install it as a plugin from this repository:
+
+```bash
+agy plugin install https://github.com/cryptokeyhole/cryptokeyhole-mcp
+```
+
+Or add it to `mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "cryptokeyhole": {
+      "serverUrl": "https://cryptokeyhole.com/api/v1/mcp"
     }
   }
 }
@@ -182,6 +230,10 @@ curl -s https://cryptokeyhole.com/api/v1/mcp \
 
 Once the server is connected, ask in plain language:
 
+- "Where are the Bitcoin liquidation clusters right now?"
+- "How much ETH got liquidated in the last 24 hours, and what are funding and open interest doing?"
+- "Have the US spot bitcoin ETFs been buying or selling this week?"
+- "Is Bitcoin above its 200-week moving average? What are the nearest support levels?"
 - "What is Bitcoin's Mayer Multiple today, and how often has it been higher over the past four years?"
 - "Fetch Bitcoin's daily hash rate for 2024 and tell me which month grew the most."
 - "How far is Bitcoin's price below its all-time high right now, and how does that compare with past cycles?"
@@ -212,9 +264,11 @@ The metric ids are the same as on the site and in the [free REST API](https://cr
 - **Free REST API, Google Sheets, Excel and Python:** [cryptokeyhole.com/data-access/](https://cryptokeyhole.com/data-access/)
 - **Free chart embeds** for blogs, newsletters and forums: [cryptokeyhole.com/embed/](https://cryptokeyhole.com/embed/)
 
-## Registry entry
+## Files in this repository
 
-[`server.json`](server.json) mirrors the server's entry in the official MCP Registry:
+- [`gemini-extension.json`](gemini-extension.json): the Gemini CLI extension.
+- [`plugin.json`](plugin.json) and [`mcp_config.json`](mcp_config.json): the Antigravity plugin, with the icon in [`assets/`](assets/).
+- [`server.json`](server.json) mirrors the server's entry in the official MCP Registry:
 
 ```bash
 curl -s 'https://registry.modelcontextprotocol.io/v0.1/servers?search=com.cryptokeyhole'

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "cryptokeyhole",
+  "displayName": "CryptoKeyhole",
+  "version": "1.2.0",
+  "description": "Crypto market and on-chain answers: liquidation maps, funding and open interest, price history, ETF flows and exchange reserves. On-chain data from our nodes.",
+  "logo": "assets/logo.png",
+  "suggestedPrompts": [
+    "Where are the Bitcoin liquidation clusters right now?",
+    "Have the US spot bitcoin ETFs been buying or selling this week?",
+    "What was Ethereum's price on 1 January 2025, and how much has it moved since?"
+  ],
+  "author": {
+    "name": "CryptoKeyhole",
+    "url": "https://cryptokeyhole.com"
+  },
+  "homepage": "https://cryptokeyhole.com/mcp/",
+  "repository": "https://github.com/cryptokeyhole/cryptokeyhole-mcp",
+  "license": "MIT",
+  "keywords": [
+    "crypto",
+    "bitcoin",
+    "ethereum",
+    "on-chain",
+    "market-data",
+    "liquidations",
+    "etf-flows"
+  ]
+}
